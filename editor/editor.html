@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Редактор комнат — Shamus-like</title>
+<style>
+  body { font-family: 'Courier New', monospace; background:#1b1d24; color:#eee; margin:0; padding:14px; }
+  h2 { margin-top:0; }
+  #toolbar { display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+  select, button, input { font-family: inherit; padding:4px 8px; }
+  canvas { image-rendering: pixelated; border:2px solid #444; cursor:crosshair; display:block; margin-top:6px; }
+  #legend { margin-top:8px; font-size:12px; opacity:0.8; max-width: 760px; }
+  textarea { width:100%; max-width: 760px; height:160px; margin-top:10px; background:#111; color:#9f9; font-size:11px; }
+  label { display:flex; gap:4px; align-items:center; }
+</style>
+</head>
+<body>
+<h2>Редактор комнат (Shamus-like)</h2>
+<div id="toolbar">
+  <label>Уровень <select id="level"></select></label>
+  <label>Комната <select id="room"></select></label>
+  <label>Инструмент
+    <select id="tool">
+      <option value="cycle">Тайл (пусто → стена → электро)</option>
+      <option value="enemy1">Враг тип 1 (вкл/выкл)</option>
+      <option value="enemy2">Враг тип 2 (вкл/выкл)</option>
+    </select>
+  </label>
+  <label><input type="checkbox" id="hasKey" /> ключ здесь</label>
+  <label><input type="checkbox" id="isExit" /> это выход уровня</label>
+  <button id="resetBtn">Сбросить к процедурной</button>
+  <button id="exportBtn">Экспортировать overrides.json</button>
+  <button id="loadBtn">Загрузить overrides из файла</button>
+  <input type="file" id="fileInput" accept="application/json" style="display:none" />
+</div>
+<canvas id="canvas"></canvas>
+<div id="legend">
+  ЛКМ по клетке — применить выбранный инструмент. Правки живут в памяти редактора для всех
+  посещённых комнат сразу; нажмите «Экспортировать», сохраните файл как
+  <code>src/data/room-overrides.json</code> (заменив текущий) и перезапустите игру — она
+  подхватит изменения при следующей загрузке этой комнаты.
+</div>
+<textarea id="output" placeholder="Здесь появится экспортированный JSON..."></textarea>
+<script type="module" src="editor.js"></script>
+</body>
+</html>

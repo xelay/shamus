@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shamus-like — личный фан-клон</title>
+<style>
+  html, body {
+    margin: 0; height: 100%; background: #111318;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', monospace; color: #eee;
+  }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; border: 2px solid #333; }
+  #hint { position: fixed; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; opacity: 0.6; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hint">WASD/стрелки — движение · Space — выстрел · P — пауза · N — новая игра (в меню) · Enter — подтвердить</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
