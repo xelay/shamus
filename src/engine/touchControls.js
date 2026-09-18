@@ -54,7 +54,14 @@ export class TouchControls {
       if (e.pointerId !== this.joystickPointerId) return;
       e.preventDefault();
       this.joystickPointerId = null;
-      this.knob.style.transform = 'translate(-50%, -50%)';
+      // Resting position comes purely from the CSS (left/top: 50% + a
+      // negative margin, no transform involved) — so clearing the inline
+      // transform, not setting it to translate(-50%, -50%), is what puts
+      // the knob back in the center. A -50%/-50% transform is relative to
+      // the KNOB's own size, so it used to add an extra half-width/height
+      // offset on top of the CSS centering and left the knob stuck toward
+      // the top-left after release.
+      this.knob.style.transform = '';
       this._applyDirs(new Set());
     };
 
@@ -73,7 +80,7 @@ export class TouchControls {
     const dist = Math.hypot(dx, dy);
     const clamped = Math.min(dist, this.maxRadius);
     if (dist > 0) { dx = (dx / dist) * clamped; dy = (dy / dist) * clamped; }
-    this.knob.style.transform = `translate(${dx - this.knob.offsetWidth / 2}px, ${dy - this.knob.offsetHeight / 2}px)`;
+    this.knob.style.transform = `translate(${dx}px, ${dy}px)`;
 
     const dirs = new Set();
     const dead = this.maxRadius * DEADZONE_RATIO;

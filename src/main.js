@@ -16,6 +16,7 @@ ctx.imageSmoothingEnabled = false;
 
 const input = new Input();
 const audio = new AudioManager();
+const touchMode = isTouchDevice();
 
 // iOS Safari only unlocks Web Audio when AudioContext creation/resume happens
 // synchronously inside a real user-gesture event (tap/keypress) -- not from a
@@ -29,7 +30,7 @@ function unlockAudioOnce() {
 window.addEventListener('pointerdown', unlockAudioOnce, { once: true });
 window.addEventListener('keydown', unlockAudioOnce, { once: true });
 
-if (isTouchDevice()) document.body.classList.add('touch-device');
+if (touchMode) document.body.classList.add('touch-device');
 const touchControls = new TouchControls(input, { onFirstInteraction: () => audio.ensure() });
 void touchControls; // wired via DOM event listeners, no further use needed here
 
@@ -56,7 +57,10 @@ function update(dt) {
   } else if (state === 'PAUSED') {
     if (input.wasPressed('KeyP')) state = 'PLAYING';
   } else if (state === 'GAMEOVER' || state === 'WIN') {
-    if (input.wasPressed('Enter')) { clearSave(); world = new World(audio); state = 'MENU'; }
+    // Space is also accepted (not just Enter) so the on-screen FIRE button
+    // works here too — there's no on-screen "Enter" button, and touch
+    // devices have no physical Enter key to fall back on.
+    if (input.wasPressed('Enter') || input.wasPressed('Space')) { clearSave(); world = new World(audio); state = 'MENU'; }
   }
   input.endFrame();
 }
@@ -75,6 +79,11 @@ function overlay(text, sub) {
   ctx.restore();
 }
 
+// Confirm-action hint: "ENTER" on keyboard, "FIRE" on touch (there's no
+// on-screen Enter key, so the sub-text should point at the button that
+// actually works).
+const CONFIRM_KEY = touchMode ? 'FIRE' : 'ENTER';
+
 function render() {
   if (world) {
     ctx.save();
@@ -87,10 +96,10 @@ function render() {
   }
 
   if (state === 'LOADING') overlay('Loading...', '');
-  else if (state === 'MENU') overlay('SHAMUS-LIKE — personal fan clone', 'ENTER — continue   N — new game');
+  else if (state === 'MENU') overlay('SHAMUS-LIKE — personal fan clone', `${CONFIRM_KEY} — continue   N — new game`);
   else if (state === 'PAUSED') overlay('PAUSED', 'P — resume');
-  else if (state === 'GAMEOVER') overlay('GAME OVER', `score ${world.score}  —  ENTER — menu`);
-  else if (state === 'WIN') overlay('ALL LEVELS CLEARED', `score ${world.score}  —  ENTER — menu`);
+  else if (state === 'GAMEOVER') overlay('GAME OVER', `score ${world.score}  —  ${CONFIRM_KEY} — menu`);
+  else if (state === 'WIN') overlay('ALL LEVELS CLEARED', `score ${world.score}  —  ${CONFIRM_KEY} — menu`);
   else if (world.levelCompleteTimer > 0) overlay(`LEVEL ${world.levelIndex + 1} COMPLETE`, 'get ready...');
 }
 
