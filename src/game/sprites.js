@@ -66,7 +66,13 @@ const PATTERNS = {
 };
 
 const PALETTES = {
-  player: { '1': '#0d1b2a', '0': '#e0e1dd', '2': '#3a86ff' },
+  // Body ('1') was near-black (#0d1b2a) and disappeared against the black
+  // room background -- only the eye/visor pixels ('0'/'2', ~3 cells out of
+  // ~30) were visible. Swapped to a bright, saturated blue for the body so
+  // the whole silhouette reads clearly, with the old near-black promoted to
+  // an accent color for the visor stripe so the "face" detail still pops
+  // against the now-bright body.
+  player: { '1': '#4cc9f0', '0': '#f8f9fa', '2': '#0d1b2a' },
   enemy1: { '1': '#1a0000', '3': '#d62828', '0': '#ffd166' },
   enemy2: { '1': '#1a0f00', '4': '#f77f00', '0': '#03071e' },
   shadow: { '5': '#7b2cbf' },
