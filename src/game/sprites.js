@@ -86,8 +86,17 @@ const PALETTES = {
   // an accent color for the visor stripe so the "face" detail still pops
   // against the now-bright body.
   player: { '1': '#4cc9f0', '0': '#f8f9fa', '2': '#0d1b2a' },
-  enemy1: { '1': '#1a0000', '3': '#d62828', '0': '#ffd166' },
-  enemy2: { '1': '#1a0f00', '4': '#f77f00', '0': '#03071e' },
+  // enemy1/enemy2 outlines ('1') were near-black (#1a0000 / #1a0f00) and
+  // disappeared against the black room background -- same issue the player
+  // sprite had, just less total screen area since each still has a large
+  // bright body ('3'/'4'). Brightened both outlines to a dark shade of their
+  // own hue (still reads as shading/contour, not the main body color) so the
+  // full silhouette -- including the legs, which are outline-only pixels --
+  // stays visible. enemy2's eye pixels ('0') were also brightened slightly;
+  // they're nested inside the body and never touch the background directly,
+  // so this is a smaller legibility polish rather than a visibility fix.
+  enemy1: { '1': '#8f2a2a', '3': '#d62828', '0': '#ffd166' },
+  enemy2: { '1': '#7a4218', '4': '#f77f00', '0': '#2e0f42' },
   // Steel grey so it reads as a distinct "heavy turret" archetype next to
   // the red/orange/purple already used by enemy1/enemy2/Shadow; the small
   // red lens pixels hint that it's the one that aims and shoots.
