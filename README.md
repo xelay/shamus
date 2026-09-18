@@ -55,6 +55,14 @@ overrides.json" button downloads a file — replace `src/data/room-overrides.jso
 it and restart the game: your edits will be layered on top of procedural generation for
 exactly the rooms you touched (the other 127 stay procedural).
 
+Every edit is auto-saved as a draft to your browser's `localStorage`, so an accidental
+page reload won't lose work in progress. That draft is only a safety net, though — the
+game itself only ever reads `src/data/room-overrides.json` from disk, so shipping a
+change still requires clicking Export and replacing that file. On every (re)load, the
+editor also fetches the currently committed `room-overrides.json` and layers your local
+draft on top of it, so coming back later to edit just one more room won't silently drop
+rooms you already exported and committed earlier.
+
 ### Known simplifications and quirks (intentional, not bugs)
 
 - All damage sources (enemies, electric walls) currently take away one life with a
@@ -121,6 +129,13 @@ exactly the rooms you touched (the other 127 stay procedural).
 类型，添加/移除敌人，标记钥匙/出口。点击"Export overrides.json"按钮会下载一个文件 ——
 用它替换 `src/data/room-overrides.json` 并重启游戏：你的修改会叠加在程序化生成结果之
 上，且仅作用于你编辑过的房间（其余 127 个房间仍保持程序化生成）。
+
+每一次修改都会自动作为草稿保存到浏览器的 `localStorage` 中，因此意外刷新页面不会丢失
+正在进行的修改。不过这个草稿只是一层安全保障——游戏本身只会从磁盘读取
+`src/data/room-overrides.json`，所以要让改动真正生效，仍然需要点击 Export 并替换该
+文件。编辑器每次（重新）加载时，都会先获取当前已提交的 `room-overrides.json`，再把本
+地草稿叠加在其之上，因此之后只想再编辑一个房间时重新打开编辑器，也不会悄悄丢掉之前已
+导出并提交过的房间。
 
 ### 已知的简化与特殊之处（有意为之，非 bug）
 
@@ -194,6 +209,15 @@ exactly the rooms you touched (the other 127 stay procedural).
 `src/data/room-overrides.json` и перезапустите игру: правки наложатся поверх
 процедурной генерации именно для тех комнат, которые вы редактировали (остальные 127
 комнат останутся процедурными).
+
+Каждая правка автоматически сохраняется черновиком в `localStorage` браузера, поэтому
+случайное обновление страницы не потеряет работу в процессе. Но это лишь страховка —
+сама игра читает только `src/data/room-overrides.json` с диска, так что для реального
+применения правок всё равно нужно нажать «Экспортировать» и заменить этот файл. При
+каждой (пере)загрузке редактор сначала подтягивает уже закоммиченный
+`room-overrides.json`, а поверх него накладывает локальный черновик — так что, вернувшись
+позже, чтобы поправить всего одну комнату, вы не потеряете молча ранее экспортированные
+и сохранённые комнаты.
 
 ### Известные упрощения и нюансы (сознательные, не баги)
 

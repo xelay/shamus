@@ -1,22 +1,98 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Shamus-like — личный фан-клон</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Shamus-like — personal fan clone</title>
+
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#111318" />
+
+<!-- iOS "Add to Home Screen" support (Safari does not fully rely on manifest.json
+     for older/legacy behavior, so these are kept alongside it). -->
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Shamus-like" />
+
 <style>
+  :root { --safe-b: env(safe-area-inset-bottom, 0px); --safe-l: env(safe-area-inset-left, 0px); --safe-r: env(safe-area-inset-right, 0px); }
+
   html, body {
-    margin: 0; height: 100%; background: #111318;
+    margin: 0; height: 100%; background: #111318; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Courier New', monospace; color: #eee;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
   }
-  canvas { image-rendering: pixelated; image-rendering: crisp-edges; border: 2px solid #333; }
+
+  #game-wrap { position: relative; touch-action: none; }
+
+  canvas {
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    border: 2px solid #333;
+    max-width: 100vw; max-height: 100vh;
+    width: auto; height: auto;
+    touch-action: none;
+    display: block;
+  }
+
   #hint { position: fixed; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12px; opacity: 0.6; }
+
+  /* Touch controls: hidden by default, shown only when main.js detects a
+     coarse (touch) pointer and adds body.touch-device. */
+  #touch-controls {
+    position: fixed; inset: 0; display: none;
+    pointer-events: none; /* let taps pass through except on the controls themselves */
+  }
+  body.touch-device #touch-controls { display: block; }
+  body.touch-device #hint { display: none; }
+
+  #joystick-base {
+    position: absolute;
+    left: calc(24px + var(--safe-l));
+    bottom: calc(28px + var(--safe-b));
+    width: 112px; height: 112px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    pointer-events: auto;
+    touch-action: none;
+  }
+  #joystick-knob {
+    position: absolute; left: 50%; top: 50%;
+    width: 46px; height: 46px; margin: -23px 0 0 -23px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+    transition: transform 0.02s linear;
+  }
+
+  #fire-btn {
+    position: absolute;
+    right: calc(28px + var(--safe-r));
+    bottom: calc(34px + var(--safe-b));
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    background: rgba(239, 71, 111, 0.3);
+    border: 2px solid rgba(239, 71, 111, 0.7);
+    color: #fff; font-family: inherit; font-size: 12px; letter-spacing: 1px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+  #fire-btn.pressed { background: rgba(239, 71, 111, 0.6); }
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<div id="hint">WASD/стрелки — движение · Space — выстрел · P — пауза · N — новая игра (в меню) · Enter — подтвердить</div>
+<div id="game-wrap">
+  <canvas id="game"></canvas>
+  <div id="touch-controls">
+    <div id="joystick-base"><div id="joystick-knob"></div></div>
+    <button id="fire-btn" aria-label="Fire">FIRE</button>
+  </div>
+</div>
+<div id="hint">WASD / arrows — move · Space — shoot · P — pause · N — new game (in menu) · Enter — confirm</div>
 <script type="module" src="src/main.js"></script>
 </body>
 </html>

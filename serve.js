@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Сервер для локальной разработки без внешних зависимостей — нужен только Node.js.
-// Существует, чтобы не зависеть от того, установлен ли у вас Python и как именно
-// (на Windows команда "python3" часто перехватывается заглушкой Microsoft Store).
-// Запуск: node serve.js [порт]   (по умолчанию 8000)
+// Zero-dependency local dev server — only needs Node.js.
+// Exists so you don't have to rely on whether Python is installed or how
+// (on Windows, the "python3" command is often intercepted by a Microsoft Store stub).
+// Run: node serve.js [port]   (default 8000)
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -39,5 +39,5 @@ const server = http.createServer((req, res) => {
 
 server.listen(port, () => {
   console.log(`Shamus-like dev server: http://localhost:${port}/`);
-  console.log('Ctrl+C — остановить');
+  console.log('Ctrl+C to stop');
 });

@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<!--
+  Standalone icon generator, kept in the repo so PWA icons can be
+  regenerated if the player sprite/palette in src/game/sprites.js ever
+  changes. Open this file in a browser and screenshot each canvas
+  (or drive it headlessly, e.g. with Playwright) to (re)export
+  icons/icon-*.png. The pattern/colors below are copy-pasted from the
+  "player" entry in src/game/sprites.js -- keep them in sync by hand,
+  there's no build step to share the source of truth automatically.
+-->
+<head><meta charset="utf-8" /><title>icon generator</title>
+<style>body{background:#000;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;padding:16px;}canvas{image-rendering:pixelated;display:block;}</style>
+</head>
+<body>
+<canvas id="icon-180" width="180" height="180"></canvas>
+<canvas id="icon-192" width="192" height="192"></canvas>
+<canvas id="icon-512" width="512" height="512"></canvas>
+<canvas id="icon-maskable-512" width="512" height="512"></canvas>
+<script>
+const PATTERN = [
+  '..1111..',
+  '.111111.',
+  '11022011',
+  '11022011',
+  '11111111',
+  '.111111.',
+  '..1..1..',
+  '.11..11.',
+];
+const COLORS = { '1': '#0d1b2a', '0': '#e0e1dd', '2': '#3a86ff' };
+const BG = '#111318';
+
+function drawIcon(canvasId, size, paddingRatio) {
+  const cnv = document.getElementById(canvasId);
+  const ctx = cnv.getContext('2d');
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, size, size);
+
+  const gridSize = 8;
+  const usable = size * (1 - paddingRatio * 2);
+  const cell = usable / gridSize;
+  const offset = (size - gridSize * cell) / 2;
+
+  for (let r = 0; r < gridSize; r++) {
+    for (let c = 0; c < gridSize; c++) {
+      const ch = PATTERN[r][c];
+      if (ch === '.') continue;
+      ctx.fillStyle = COLORS[ch];
+      ctx.fillRect(offset + c * cell, offset + r * cell, Math.ceil(cell), Math.ceil(cell));
+    }
+  }
+}
+
+// Regular icons: small safe padding just so the sprite doesn't touch the edge.
+drawIcon('icon-180', 180, 0.10);
+drawIcon('icon-192', 192, 0.10);
+drawIcon('icon-512', 512, 0.10);
+// Maskable icon: OS may crop this into a circle/squircle, so the important
+// content must stay within the inner ~safe zone -- much bigger padding.
+drawIcon('icon-maskable-512', 512, 0.24);
+
+window.__iconsReady = true; // signal for the headless screenshot script
+</script>
+</body>
+</html>

@@ -15,21 +15,36 @@ const toolSel = document.getElementById('tool');
 const hasKeyBox = document.getElementById('hasKey');
 const isExitBox = document.getElementById('isExit');
 const output = document.getElementById('output');
+const statusEl = document.getElementById('status');
 
-// overrides редактора: ключ `${level}:${roomId}` -> частичное описание комнаты
+// Editor overrides: key `${level}:${roomId}` -> partial room description.
+// Source of truth on startup — two persistence layers:
+//  1) src/data/room-overrides.json — what's actually committed and picked up by the game;
+//  2) this browser's localStorage draft — a safety net against an accidental page
+//     refresh BEFORE you clicked "Export". The draft updates on every change and
+//     survives a reload, but it's NOT the same as saving into the game — that
+//     still needs an export + replacing the file.
+const DRAFT_KEY = 'shamus_editor_draft_v1';
+
 let overrides = {};
 let currentLevel = 0, currentRoomId = 0;
 let grid = [], enemies = [];
 
 for (let i = 0; i < NUM_LEVELS; i++) {
   const opt = document.createElement('option');
-  opt.value = i; opt.textContent = `Уровень ${i + 1}`;
+  opt.value = i; opt.textContent = `Level ${i + 1}`;
   levelSel.appendChild(opt);
 }
 for (let i = 0; i < ROOMS_PER_LEVEL; i++) {
   const opt = document.createElement('option');
-  opt.value = i; opt.textContent = `Комната ${i} (${i % LEVEL_COLS}, ${Math.floor(i / LEVEL_COLS)})`;
+  opt.value = i; opt.textContent = `Room ${i} (${i % LEVEL_COLS}, ${Math.floor(i / LEVEL_COLS)})`;
   roomSel.appendChild(opt);
+}
+
+function setStatus(msg) { if (statusEl) statusEl.textContent = msg; }
+
+function persistDraft() {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(overrides)); } catch { /* storage unavailable — not critical */ }
 }
 
 function saveCurrentToOverrides() {
@@ -40,6 +55,12 @@ function saveCurrentToOverrides() {
     hasKey: hasKeyBox.checked,
     isExit: isExitBox.checked,
   };
+}
+
+// Call after EVERY change — commits the edit and immediately writes the draft to localStorage.
+function commit() {
+  saveCurrentToOverrides();
+  persistDraft();
 }
 
 function loadRoom() {
@@ -92,19 +113,21 @@ canvas.addEventListener('click', (ev) => {
     else enemies.push({ col: c, row: r, type: tool });
   }
   draw();
+  commit(); // every click is committed immediately and written to the localStorage draft
 });
 
-[levelSel, roomSel].forEach((el) => el.addEventListener('change', () => { saveCurrentToOverrides(); loadRoom(); }));
-hasKeyBox.addEventListener('change', saveCurrentToOverrides);
-isExitBox.addEventListener('change', saveCurrentToOverrides);
+[levelSel, roomSel].forEach((el) => el.addEventListener('change', () => { commit(); loadRoom(); }));
+hasKeyBox.addEventListener('change', commit);
+isExitBox.addEventListener('change', commit);
 
 document.getElementById('resetBtn').addEventListener('click', () => {
   delete overrides[`${currentLevel}:${currentRoomId}`];
+  persistDraft();
   loadRoom();
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  saveCurrentToOverrides();
+  commit();
   const json = JSON.stringify(overrides, null, 2);
   output.value = json;
   const blob = new Blob([json], { type: 'application/json' });
@@ -112,6 +135,7 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.href = URL.createObjectURL(blob);
   a.download = 'room-overrides.json';
   a.click();
+  setStatus(`Exported ${Object.keys(overrides).length} room(s). Don't forget to replace src/data/room-overrides.json and restart the game.`);
 });
 
 document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
@@ -121,11 +145,52 @@ document.getElementById('fileInput').addEventListener('change', async (ev) => {
   try {
     const text = await file.text();
     overrides = JSON.parse(text);
+    persistDraft();
     output.value = text;
     loadRoom();
+    setStatus(`Loaded from file: ${Object.keys(overrides).length} room(s).`);
   } catch {
-    alert('Некорректный JSON');
+    alert('Invalid JSON');
   }
 });
 
-loadRoom();
+document.getElementById('clearDraftBtn').addEventListener('click', () => {
+  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+  init();
+});
+
+// Startup load: first what's actually committed in src/data/room-overrides.json,
+// then layered with this browser's localStorage draft (it takes priority, being
+// more recent unsaved edits). If neither exists, start from a clean procedural
+// generation.
+async function init() {
+  overrides = {};
+  let committedCount = 0, draftCount = 0;
+
+  try {
+    const res = await fetch('../src/data/room-overrides.json', { cache: 'no-store' });
+    if (res.ok) {
+      const committed = await res.json();
+      Object.assign(overrides, committed);
+      committedCount = Object.keys(committed).length;
+    }
+  } catch { /* file doesn't exist yet, or the editor isn't served over http — not critical */ }
+
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      Object.assign(overrides, draft);
+      draftCount = Object.keys(draft).length;
+    }
+  } catch { /* corrupted draft — ignore */ }
+
+  const parts = [];
+  if (committedCount) parts.push(`${committedCount} room(s) from room-overrides.json`);
+  if (draftCount) parts.push(`${draftCount} room(s) from the browser draft`);
+  setStatus(parts.length ? `Loaded: ${parts.join(', ')}.` : 'No edits yet — editing the clean procedural generation.');
+
+  loadRoom();
+}
+
+init();
