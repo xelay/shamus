@@ -24,8 +24,31 @@ For setup instructions and the project structure, see
 - **N** — new game (from the menu; clears the save)
 - **Enter** — confirm / continue a saved game
 
+On a touch device (phone/tablet), a virtual joystick and a fire button appear
+automatically in place of the keyboard hints — see "Touch controls & installing on
+iOS" below.
+
 Progress (level, room, score, collected keys) is saved automatically to the browser's
 `localStorage` — no server needed.
+
+### Touch controls & installing on iOS
+
+On a touch-capable device the game detects the lack of a keyboard and shows an
+on-screen virtual joystick (drag to move) plus a fire button, wired into the same input
+system as the keyboard — no separate touch codepath to keep in sync.
+
+The project is also installable as a standalone app (PWA):
+
+- **iOS (Safari):** open the game's URL, tap the Share icon, then "Add to Home
+  Screen". It launches full-screen with its own icon, no browser chrome.
+- **Android (Chrome):** open the URL, then use the menu → "Add to Home screen" /
+  "Install app" (Chrome may also offer this automatically via a banner).
+
+Once installed, a service worker caches the game's files so it keeps working offline
+after the first load. Since this project has no build step, the service worker uses a
+network-first strategy (always tries the network first, falls back to the cache) so
+that local edits during development are never masked by a stale cache — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ### How level generation works
 
@@ -71,7 +94,6 @@ rooms you already exported and committed earlier.
 - Interior obstacles are placed procedurally with a "don't block the center, and never
   block the area right around a door" rule; in theory a very awkward room could still
   slip through — fixable via the editor.
-- Keyboard-only controls — no touch/gamepad support yet (could be added later).
 - No backend and no cloud saves — only `localStorage`, scoped to one browser on one
   device.
 - The original title screen used "Marche funèbre d'une marionnette" (Gounod) — public
@@ -79,10 +101,9 @@ rooms you already exported and committed earlier.
 
 ### Ideas for future development
 
-- Touch controls (virtual stick + button) for mobile.
-- PWA wrapper (service worker) for offline play.
 - More elaborate enemy AI patterns.
 - A fuller level editor with undo/redo and a room-connectivity preview.
+- Gamepad support.
 
 ---
 
@@ -103,8 +124,28 @@ rooms you already exported and committed earlier.
 - **N** — 新游戏（在菜单中，会清除存档）
 - **Enter** — 确认 / 继续已保存的游戏
 
+在触屏设备（手机/平板）上，界面会自动用虚拟摇杆和射击按钮替代键盘提示 —— 详见下方
+"触屏操作与 iOS 安装"。
+
 进度（关卡、房间、分数、已收集的钥匙）会自动保存到浏览器的 `localStorage` 中 — 无需
 服务器。
+
+### 触屏操作与 iOS 安装
+
+在支持触控的设备上，游戏会检测到没有物理键盘，并显示一个屏幕虚拟摇杆（拖动以移动）和
+一个射击按钮，二者接入的是与键盘完全相同的输入系统 —— 不存在需要单独维护的触控代码
+路径。
+
+本项目也支持作为独立应用安装（PWA）：
+
+- **iOS（Safari）：** 打开游戏的网址，点击分享图标，选择"添加到主屏幕"。安装后会以
+  全屏方式启动，带有自己的图标，没有浏览器界面。
+- **Android（Chrome）：** 打开网址后，通过菜单选择"添加到主屏幕"/"安装应用"（Chrome
+  也可能会通过横幅自动提示）。
+
+安装后，Service Worker 会缓存游戏文件，使其在首次加载后也能离线运行。由于本项目没有
+构建步骤，Service Worker 采用"网络优先"策略（始终优先尝试网络，失败时回退到缓存），
+这样开发过程中的本地修改就不会被陈旧的缓存所掩盖 —— 详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ### 关卡生成原理
 
@@ -143,7 +184,6 @@ rooms you already exported and committed earlier.
   电墙会无条件立即致死；这里做了有意的简化，避免游戏过于苛刻。
 - 房间内部的障碍物由程序按照"不阻挡中心区域、且绝不阻挡门口周围区域"的规则放置；理论
   上仍有极小概率出现不太合理的房间布局 —— 可通过编辑器修复。
-- 目前仅支持键盘操作 —— 尚未支持触屏/手柄（可在日后添加）。
 - 没有后端，也没有云存档 —— 仅使用 `localStorage`，作用范围限定在某一设备的某一浏览
   器内。
 - 原作标题画面使用的是古诺（Gounod）的《木偶的葬礼进行曲》("Marche funèbre d'une
@@ -151,10 +191,9 @@ rooms you already exported and committed earlier.
 
 ### 后续开发构想
 
-- 为移动端添加触屏操作（虚拟摇杆 + 按钮）。
-- 通过 Service Worker 打包为 PWA，实现离线游玩。
 - 更丰富的敌人 AI 行为模式。
 - 功能更完整的关卡编辑器，支持撤销/重做以及房间连通性预览。
+- 手柄支持。
 
 ---
 
@@ -179,8 +218,33 @@ rooms you already exported and committed earlier.
 - **N** — новая игра (в меню, стирает сохранение)
 - **Enter** — подтвердить / продолжить сохранённую игру
 
+На сенсорном устройстве (телефон/планшет) вместо подсказок по клавиатуре автоматически
+появляются виртуальный джойстик и кнопка выстрела — подробнее в разделе «Touch-
+управление и установка на iOS» ниже.
+
 Прогресс (уровень, комната, счёт, собранные ключи) автоматически сохраняется в
 `localStorage` браузера — сервер для этого не нужен.
+
+### Touch-управление и установка на iOS
+
+На устройстве с сенсорным экраном игра сама определяет отсутствие физической клавиатуры
+и показывает виртуальный джойстик на экране (перетаскивание — движение) и кнопку
+выстрела; оба элемента используют ту же систему ввода, что и клавиатура — отдельного
+touch-кода, который пришлось бы поддерживать параллельно, нет.
+
+Проект также можно установить как отдельное приложение (PWA):
+
+- **iOS (Safari):** откройте адрес игры, нажмите иконку «Поделиться», затем «На экран
+  «Домой»». Игра запустится в полноэкранном режиме, со своей иконкой, без интерфейса
+  браузера.
+- **Android (Chrome):** откройте адрес, затем через меню выберите «Добавить на главный
+  экран» / «Установить приложение» (Chrome может также сам предложить это баннером).
+
+После установки Service Worker кэширует файлы игры, так что после первой загрузки она
+продолжает работать офлайн. Поскольку в проекте нет шага сборки, Service Worker
+использует стратегию «сначала сеть» (всегда сперва пытается загрузить из сети, и только
+при неудаче берёт из кэша) — так локальные правки во время разработки никогда не
+маскируются устаревшим кэшем; подробности — в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Как устроена генерация уровней
 
@@ -227,7 +291,6 @@ rooms you already exported and committed earlier.
 - Внутренние препятствия в комнатах расставляются процедурно по правилу "не блокировать
   центр и никогда не блокировать зону сразу у двери"; теоретически (очень редко) может
   получиться неудобная комната — правится через редактор.
-- Управление только с клавиатуры — тач/геймпад не реализованы (можно добавить позже).
 - Никакой серверной части и облачных сохранений — только `localStorage` в конкретном
   браузере на конкретном устройстве.
 - Музыка на титульном экране оригинала — общественное достояние («Marche funèbre d'une
@@ -235,7 +298,6 @@ rooms you already exported and committed earlier.
 
 ### Идеи для дальнейшего развития
 
-- Touch-управление (виртуальный стик + кнопка) для мобильных.
-- PWA-обёртка (service worker) для оффлайн-игры.
 - Более сложные паттерны ИИ врагов.
 - Полноценный уровень-редактор с undo/redo и предпросмотром связности комнат.
+- Поддержка геймпада.

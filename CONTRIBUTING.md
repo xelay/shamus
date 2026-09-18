@@ -37,24 +37,54 @@ Live Server", no terminal needed at all.
 Then open `http://localhost:8000/`. The room editor lives at
 `http://localhost:8000/editor/editor.html`.
 
+### Testing on a phone / iOS install during development
+
+To test touch controls or "Add to Home Screen" on an actual phone, the phone needs to
+reach the dev server over the network (not just `localhost`): start the server, find
+your computer's LAN IP, and open `http://<your-lan-ip>:8000/` from the phone (same
+Wi-Fi network). iOS Safari only offers "Add to Home Screen" for pages it has actually
+loaded, so visit the page there first.
+
+The service worker (see below) caches aggressively across reloads; if a change isn't
+showing up on the phone, close the installed app/tab fully and reopen, or clear the
+site's data.
+
 ## Project structure
 
 ```
-index.html              entry point
+index.html              entry point; also carries the PWA <meta> tags (manifest link,
+                          apple-touch-icon, apple-mobile-web-app-*) and the touch-
+                          controls overlay markup (#touch-controls, joystick, fire button)
 serve.js                 zero-dependency dev server (node serve.js)
+manifest.json             Web App Manifest (name, icons, standalone display, theme color)
+sw.js                     service worker: precaches all game files, network-first with
+                           cache fallback (see "Notes for future changes" below)
+icons/                    app icons referenced by manifest.json / apple-touch-icon
+                           (icon-180.png, icon-192.png, icon-512.png, icon-maskable-512.png)
+tools/
+  icon-gen.html            standalone page that programmatically draws the app icons
+                            onto <canvas> elements in the game's own sprite style
+                            (regeneration tool, not loaded by the game itself)
 src/
   main.js                 bootstrap: canvas, game loop, state machine
-                           (menu / playing / paused / game over)
+                           (menu / playing / paused / game over), iOS audio-unlock
+                           listener, touch-controls wiring, service worker registration
   engine/                 reusable "engine" layer, knows nothing Shamus-specific
     loop.js                fixed-timestep game loop (60 Hz)
-    input.js                keyboard (isDown / wasPressed)
+    input.js                keyboard (isDown / wasPressed) + simulateKeyDown/Up, used
+                             by touchControls.js to feed touch input through the same
+                             state as the keyboard
+    touchControls.js         virtual joystick + fire button (Pointer Events), only
+                              active on touch-capable devices (isTouchDevice())
     collision.js             AABB/tile collision
     audio.js                  sound synthesis (Web Audio, no samples)
     save.js                    localStorage save/load
     prng.js                     deterministic PRNG (mulberry32) for procedural generation
   game/
     constants.js               all sizes/speeds/timings in one place
-    sprites.js                  procedural pixel sprites (no external PNGs)
+    sprites.js                  procedural pixel sprites (no external PNGs) — the
+                                 player sprite's pattern/palette is also what
+                                 tools/icon-gen.html reuses for the app icon
     levelgen.js                  generator for the 4x32 rooms: connectivity,
                                   lock-and-key, enemy placement, entrance-safety buffer
     room.js                       runtime for a single room (enemy respawn, Shadow timer)
@@ -79,3 +109,30 @@ editor/
 - `isEntranceBuffer()` (exported from `levelgen.js`) is the single source of truth for
   "don't place obstacles/enemies/keys right next to a door" — reuse it rather than
   duplicating the rule if you add new spawn logic.
+- `sw.js` uses a **network-first, cache-fallback** strategy on purpose (not cache-first):
+  every request tries the network first and writes the result into the cache, only
+  falling back to the cache on a network failure. Since there's no build step or cache
+  busting, cache-first would mean edits during development silently don't show up until
+  the cache is manually cleared. If you add new files to the project that the game
+  loads, add them to `PRECACHE_URLS` in `sw.js` too, or they simply won't be available
+  offline (this fails soft, not a functional bug, just missing offline coverage).
+  Bump `CACHE_NAME` (e.g. `shamus-like-v2`) when you want to force old cached entries
+  from a previous session to be discarded on the next visit.
+- App icons in `icons/` were generated with `tools/icon-gen.html` (open it directly in
+  a browser — it draws 4 `<canvas>` elements you can right-click → "Save image as").
+  It deliberately duplicates the player sprite's pixel pattern and palette from
+  `src/game/sprites.js` (`PATTERNS.player` / `PALETTES.player`) rather than importing
+  the module, since it's meant to be a standalone tool — if you change the player
+  sprite's look, update `tools/icon-gen.html`'s copy to match and regenerate the icons.
+  The maskable icon (`icon-maskable-512.png`) uses extra inner padding (safe zone) per
+  the maskable-icon spec so Android doesn't crop the robot's outline when it applies a
+  shape mask.
+- Touch input funnels through `Input.simulateKeyDown/Up` in `input.js`, which is the
+  exact same code path real keyboard events use — anything that reacts to keyboard
+  state (`isDown`, `wasPressed`) automatically also reacts to touch, so there's no
+  separate touch-specific game logic to keep in sync.
+- iOS requires `AudioContext` creation/`resume()` to happen synchronously inside a real
+  user-gesture event handler, not on a later frame — `main.js` has a one-time
+  `pointerdown`/`keydown` listener (`unlockAudioOnce`) specifically for this; don't move
+  audio initialization into `requestAnimationFrame` or a game-loop tick, it will silently
+  stay muted on iOS Safari.
