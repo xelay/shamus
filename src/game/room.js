@@ -1,5 +1,6 @@
 import { TILE, ROOM_COLS, ROOM_ROWS, TILE_LOCKED_DOOR, TILE_EMPTY } from './constants.js';
 import { mulberry32 } from '../engine/prng.js';
+import { isEntranceBuffer } from './levelgen.js';
 import { Enemy } from './entities/enemy.js';
 import { Key } from './entities/pickups.js';
 
@@ -23,7 +24,10 @@ export class RoomRuntime {
     this.key = null;
     if (this.def.hasKey) {
       let kc = 2, kr = 2, tries = 0;
-      while (this.grid[kr]?.[kc] !== TILE_EMPTY && tries < 40) {
+      while (
+        (this.grid[kr]?.[kc] !== TILE_EMPTY || isEntranceBuffer(kr, kc, this.def.doors)) &&
+        tries < 40
+      ) {
         kc = 2 + Math.floor(rng() * (ROOM_COLS - 4));
         kr = 2 + Math.floor(rng() * (ROOM_ROWS - 4));
         tries++;

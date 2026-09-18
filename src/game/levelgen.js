@@ -80,23 +80,41 @@ function farthest(dist) {
   return best;
 }
 
+const MID_C = Math.floor(ROOM_COLS / 2);
+const MID_R = Math.floor(ROOM_ROWS / 2);
+
+// Буфер безопасности вокруг каждой активной двери: клетки в этой зоне никогда
+// не занимаются препятствиями (стена/электро) или врагами, чтобы при входе в
+// комнату всегда было свободное пространство для манёвра и нельзя было
+// "застрять в текстуре" прямо у порога.
+// Экспортируется — используется и здесь (генерация стен), и в room.js
+// (расстановка врагов), чтобы правило было ровно одно на весь проект.
+export function isEntranceBuffer(row, col, doors) {
+  if (doors.N && row <= 3 && col >= MID_C - 2 && col <= MID_C + 1) return true;
+  if (doors.S && row >= ROOM_ROWS - 4 && col >= MID_C - 2 && col <= MID_C + 1) return true;
+  if (doors.W && col <= 3 && row >= MID_R - 2 && row <= MID_R + 1) return true;
+  if (doors.E && col >= ROOM_COLS - 4 && row >= MID_R - 2 && row <= MID_R + 1) return true;
+  return false;
+}
+
 function buildRoomTiles(rng, doors, allowElectricBorder) {
   const grid = Array.from({ length: ROOM_ROWS }, () => new Array(ROOM_COLS).fill(TILE_EMPTY));
   for (let c = 0; c < ROOM_COLS; c++) { grid[0][c] = TILE_WALL; grid[ROOM_ROWS - 1][c] = TILE_WALL; }
   for (let r = 0; r < ROOM_ROWS; r++) { grid[r][0] = TILE_WALL; grid[r][ROOM_COLS - 1] = TILE_WALL; }
 
-  const midC = Math.floor(ROOM_COLS / 2), midR = Math.floor(ROOM_ROWS / 2);
-  if (doors.N) { grid[0][midC - 1] = TILE_EMPTY; grid[0][midC] = TILE_EMPTY; }
-  if (doors.S) { grid[ROOM_ROWS - 1][midC - 1] = TILE_EMPTY; grid[ROOM_ROWS - 1][midC] = TILE_EMPTY; }
-  if (doors.W) { grid[midR - 1][0] = TILE_EMPTY; grid[midR][0] = TILE_EMPTY; }
-  if (doors.E) { grid[midR - 1][ROOM_COLS - 1] = TILE_EMPTY; grid[midR][ROOM_COLS - 1] = TILE_EMPTY; }
+  if (doors.N) { grid[0][MID_C - 1] = TILE_EMPTY; grid[0][MID_C] = TILE_EMPTY; }
+  if (doors.S) { grid[ROOM_ROWS - 1][MID_C - 1] = TILE_EMPTY; grid[ROOM_ROWS - 1][MID_C] = TILE_EMPTY; }
+  if (doors.W) { grid[MID_R - 1][0] = TILE_EMPTY; grid[MID_R][0] = TILE_EMPTY; }
+  if (doors.E) { grid[MID_R - 1][ROOM_COLS - 1] = TILE_EMPTY; grid[MID_R][ROOM_COLS - 1] = TILE_EMPTY; }
 
-  // немного внутренних препятствий; центр комнаты нарочно оставляем свободным
+  // немного внутренних препятствий; центр комнаты и зона входа у каждой
+  // активной двери (isEntranceBuffer) нарочно остаются свободными
   const obstacles = 5 + Math.floor(rng() * 5);
   for (let i = 0; i < obstacles; i++) {
     const c = 2 + Math.floor(rng() * (ROOM_COLS - 4));
     const r = 2 + Math.floor(rng() * (ROOM_ROWS - 4));
-    if (Math.abs(c - midC) < 2 && Math.abs(r - midR) < 2) continue;
+    if (Math.abs(c - MID_C) < 2 && Math.abs(r - MID_R) < 2) continue; // центр
+    if (isEntranceBuffer(r, c, doors)) continue; // безопасная зона у входа
     grid[r][c] = rng() < 0.35 ? TILE_ELECTRIC : TILE_WALL;
   }
 
@@ -149,11 +167,10 @@ function generateLevel(levelIndex) {
       for (const dir of Object.keys(DIRS)) if (adj[i][dir] === other) lockedSide = dir;
     }
     if (lockedSide) {
-      const midC = Math.floor(ROOM_COLS / 2), midR = Math.floor(ROOM_ROWS / 2);
-      if (lockedSide === 'N') { grid[0][midC - 1] = TILE_LOCKED_DOOR; grid[0][midC] = TILE_LOCKED_DOOR; }
-      if (lockedSide === 'S') { grid[ROOM_ROWS - 1][midC - 1] = TILE_LOCKED_DOOR; grid[ROOM_ROWS - 1][midC] = TILE_LOCKED_DOOR; }
-      if (lockedSide === 'W') { grid[midR - 1][0] = TILE_LOCKED_DOOR; grid[midR][0] = TILE_LOCKED_DOOR; }
-      if (lockedSide === 'E') { grid[midR - 1][ROOM_COLS - 1] = TILE_LOCKED_DOOR; grid[midR][ROOM_COLS - 1] = TILE_LOCKED_DOOR; }
+      if (lockedSide === 'N') { grid[0][MID_C - 1] = TILE_LOCKED_DOOR; grid[0][MID_C] = TILE_LOCKED_DOOR; }
+      if (lockedSide === 'S') { grid[ROOM_ROWS - 1][MID_C - 1] = TILE_LOCKED_DOOR; grid[ROOM_ROWS - 1][MID_C] = TILE_LOCKED_DOOR; }
+      if (lockedSide === 'W') { grid[MID_R - 1][0] = TILE_LOCKED_DOOR; grid[MID_R][0] = TILE_LOCKED_DOOR; }
+      if (lockedSide === 'E') { grid[MID_R - 1][ROOM_COLS - 1] = TILE_LOCKED_DOOR; grid[MID_R][ROOM_COLS - 1] = TILE_LOCKED_DOOR; }
     }
 
     const enemyCount = i === startRoom ? 0 : 1 + Math.floor(roomRng() * (1 + levelIndex));
@@ -164,8 +181,12 @@ function generateLevel(levelIndex) {
         ex = 2 + Math.floor(roomRng() * (ROOM_COLS - 4));
         ey = 2 + Math.floor(roomRng() * (ROOM_ROWS - 4));
         tries++;
-      } while (grid[ey][ex] !== TILE_EMPTY && tries < 20);
-      enemies.push({ col: ex, row: ey, type: roomRng() < 0.5 ? 'enemy1' : 'enemy2' });
+      } while ((grid[ey][ex] !== TILE_EMPTY || isEntranceBuffer(ey, ex, doors)) && tries < 30);
+      // если за 30 попыток не нашли клетку вне буфера входа — пропускаем этого врага,
+      // лучше меньше врагов, чем враг в дверном проёме
+      if (grid[ey][ex] === TILE_EMPTY && !isEntranceBuffer(ey, ex, doors)) {
+        enemies.push({ col: ex, row: ey, type: roomRng() < 0.5 ? 'enemy1' : 'enemy2' });
+      }
     }
 
     rooms.push({
