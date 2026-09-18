@@ -185,7 +185,9 @@ function generateLevel(levelIndex) {
       // если за 30 попыток не нашли клетку вне буфера входа — пропускаем этого врага,
       // лучше меньше врагов, чем враг в дверном проёме
       if (grid[ey][ex] === TILE_EMPTY && !isEntranceBuffer(ey, ex, doors)) {
-        enemies.push({ col: ex, row: ey, type: roomRng() < 0.5 ? 'enemy1' : 'enemy2' });
+        const typeRoll = roomRng();
+        const type = typeRoll < 1 / 3 ? 'enemy1' : typeRoll < 2 / 3 ? 'enemy2' : 'enemy3';
+        enemies.push({ col: ex, row: ey, type });
       }
     }
 

@@ -2,9 +2,7 @@
 
 **Languages:** [English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md)
 
-个人非商业性质的 *Shamus*（Synapse Software，1982 年，设计者 Cathryn Mataga）同人复刻 ——
-不含原作的任何素材或代码，这里的一切都是原创的：程序绘制的像素精灵、Web Audio 合成的音
-效、程序化生成的房间。不用于发布或商业用途。
+个人非商业性质的 *Shamus* 同人复刻。
 
 安装和运行说明、项目结构请参见 [CONTRIBUTING.md](CONTRIBUTING.md)（仅英文）。
 
@@ -66,7 +64,8 @@
 |---|---|---|
 | ![深红徘徊者](docs/sprites/enemy1.png) | **深红徘徊者**（Crimson Drone） | 在房间里随机游荡，每隔 1–3 秒随机改变方向。不会记住玩家的位置 —— 是否与你相遇纯靠运气。 |
 | ![琥珀追猎者](docs/sprites/enemy2.png) | **琥珀追猎者**（Amber Stalker） | 大多数时候和「深红徘徊者」一样随机游荡，但每一帧都有约 2% 的小概率转向并直冲向你 —— 一种轻度、不可预测的追击。 |
-| ![影子](docs/sprites/shadow.png) | **影子**（Shadow） | 如果你在一个房间里停留过久（见 `constants.js` 中的 `SHADOW_TIMEOUT`）就会出现。它无法被击杀，且会径直朝你追来 —— 射击只能将其短暂击晕，不能消灭它。 |
+| ![铁哨兵](docs/sprites/enemy3.png) | **铁哨兵**（Iron Sentinel） | 移动速度比其他敌人慢得多，几乎不怎么游走，但每隔几秒（默认 2–3.5 秒，见 `constants.js` 中的 `SHOOTER_FIRE_MIN`/`SHOOTER_FIRE_MAX`）会瞄准你所在的位置发射一发子弹。同一时间它只会有一发子弹在飞行中 —— 有充足的时间躲避或将其击落。你的子弹碰到它的子弹会将其摧毁。 |
+| ![影子](docs/sprites/shadow.png) | **影子**（Shadow） | 如果你在一个房间里停留过久就会出现 —— 默认 14 秒（`constants.js` 中的 `SHADOW_TIMEOUT`）。它无法被击杀，且会径直朝你追来 —— 射击只能将其短暂击晕，不能消灭它。 |
 | ![钥匙](docs/sprites/key.png) | **钥匙**（Key） | 用于打开通往本关出口的锁门。总是被放置在一个无需跨越那扇锁门即可到达的房间里。 |
 | ![出口](docs/sprites/exit.png) | **出口**（Exit） | 到达出口即可通关并进入下一关。在收集到本关的钥匙（如果本关有锁的话）之前无法到达。 |
 
@@ -80,8 +79,6 @@
   [CONTRIBUTING.md](CONTRIBUTING.md)）。
 - 没有后端，也没有云存档 —— 仅使用 `localStorage`，作用范围限定在某一设备的某一浏览
   器内。
-- 原作标题画面使用的是古诺（Gounod）的《木偶的葬礼进行曲》("Marche funèbre d'une
-  marionnette")，属于公共领域作品，但本项目完全没有还原它 —— 所有音效均为程序合成。
 
 ### 后续开发构想
 

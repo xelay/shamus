@@ -114,6 +114,21 @@ export class World {
     for (const e of room.enemies) if (aabbIntersect(p, e)) this._killPlayer();
     if (room.shadow && room.shadow.stun <= 0 && aabbIntersect(p, room.shadow)) this._killPlayer();
 
+    // Shots fired by a shooting enemy (currently only 'enemy3'): they hurt the
+    // player like any other damage source, and a player shot destroys one on
+    // contact (shots cancel each other out -- both are marked dead).
+    for (const e of room.enemies) {
+      for (const eshot of e.shots) {
+        if (eshot.dead) continue;
+        if (aabbIntersect(eshot, p)) { eshot.dead = true; this._killPlayer(); continue; }
+        for (const pshot of p.shots) {
+          if (!pshot.dead && aabbIntersect(eshot, pshot)) { eshot.dead = true; pshot.dead = true; this.audio.hit(); break; }
+        }
+      }
+      e.shots = e.shots.filter((s) => !s.dead);
+    }
+    p.shots = p.shots.filter((s) => !s.dead); // a shot may have just been cancelled above
+
     if (room.key && !room.key.taken && aabbIntersect(p, room.key)) {
       room.key.taken = true;
       this.keysCollected[this.levelIndex] = true;

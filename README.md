@@ -2,10 +2,7 @@
 
 **Languages:** [English](README.md) · [中文](README.zh.md) · [Русский](README.ru.md)
 
-A personal, non-commercial fan clone of *Shamus* (Synapse Software, 1982, designed by
-Cathryn Mataga) — no original assets or code, everything here is original: procedural
-pixel sprites, synthesized Web Audio sound, and procedurally generated rooms. Not
-intended for publication or commercial use.
+A personal, non-commercial fan clone of *Shamus*.
 
 For setup instructions and the project structure, see
 [CONTRIBUTING.md](CONTRIBUTING.md) (English only).
@@ -74,7 +71,8 @@ simply fully open; this is a safe fallback, not a bug.
 |---|---|---|
 | ![Crimson Drone](docs/sprites/enemy1.png) | **Crimson Drone** | Wanders the room at random, changing direction every 1–3 seconds. No memory of the player — pure chance decides whether you cross paths. |
 | ![Amber Stalker](docs/sprites/enemy2.png) | **Amber Stalker** | Wanders like the Crimson Drone most of the time, but each frame has a small chance (~2%) to turn and head straight for you instead — a light, unpredictable pursuit. |
-| ![Shadow](docs/sprites/shadow.png) | **Shadow** | Appears if you linger too long in one room (see `SHADOW_TIMEOUT` in `constants.js`). Relentless and unkillable — it heads straight for you, and a shot only stuns it briefly rather than destroying it. |
+| ![Iron Sentinel](docs/sprites/enemy3.png) | **Iron Sentinel** | Moves far slower than the other enemies and barely wanders, but takes aim and fires a single shot straight at your position every few seconds (`SHOOTER_FIRE_MIN`–`SHOOTER_FIRE_MAX` in `constants.js`, 2–3.5s by default). Only one of its shots is ever in flight at a time — plenty of time to dodge or shoot it down. Your own shots destroy its shot on contact. |
+| ![Shadow](docs/sprites/shadow.png) | **Shadow** | Appears if you linger too long in one room — 14 seconds by default (`SHADOW_TIMEOUT` in `constants.js`). Relentless and unkillable — it heads straight for you, and a shot only stuns it briefly rather than destroying it. |
 | ![Key](docs/sprites/key.png) | **Key** | Unlocks the locked door blocking the path to the level's exit. Always placed somewhere reachable without crossing that door. |
 | ![Exit](docs/sprites/exit.png) | **Exit** | Reach it to clear the level and move to the next. Unreachable until the level's key (if it has one) is collected. |
 
@@ -89,8 +87,6 @@ simply fully open; this is a safe fallback, not a bug.
   `src/data/room-overrides.json` (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 - No backend and no cloud saves — only `localStorage`, scoped to one browser on one
   device.
-- The original title screen used "Marche funèbre d'une marionnette" (Gounod) — public
-  domain, but not reproduced here at all: all audio is procedural synthesis.
 
 ### Ideas for future development
 

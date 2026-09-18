@@ -33,6 +33,19 @@ const PATTERNS = {
     '.1.11.1.',
     '1.1..1.1',
   ],
+  // enemy3: slow, heavily-armored "turret" build -- flat plated top/bottom
+  // rows instead of the rounded/diamond silhouette of enemy1/enemy2, so it
+  // reads as visually distinct at a glance.
+  enemy3: [
+    '11111111',
+    '13333331',
+    '13033031',
+    '13333331',
+    '13333331',
+    '11111111',
+    '.1.11.1.',
+    '.1.11.1.',
+  ],
   shadow: [
     '..5555..',
     '.555555.',
@@ -75,6 +88,10 @@ const PALETTES = {
   player: { '1': '#4cc9f0', '0': '#f8f9fa', '2': '#0d1b2a' },
   enemy1: { '1': '#1a0000', '3': '#d62828', '0': '#ffd166' },
   enemy2: { '1': '#1a0f00', '4': '#f77f00', '0': '#03071e' },
+  // Steel grey so it reads as a distinct "heavy turret" archetype next to
+  // the red/orange/purple already used by enemy1/enemy2/Shadow; the small
+  // red lens pixels hint that it's the one that aims and shoots.
+  enemy3: { '1': '#495057', '3': '#adb5bd', '0': '#e63946' },
   shadow: { '5': '#7b2cbf' },
   key: { '6': '#ffd60a', '0': '#1a1a1a' },
   exit: { '7': '#06d6a0', '0': '#073b3a' },
