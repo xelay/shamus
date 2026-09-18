@@ -1,7 +1,7 @@
 // Процедурная генерация 4 уровней по 32 комнаты (итого 128, как в оригинале).
 // Генерация детерминирована (BASE_SEED) — мир персистентен между запусками.
-// Поверх процедурной базы можно накладывать ручные правки из редактора
-// (src/data/room-overrides.json), см. setOverrides().
+// Поверх процедурной базы можно накладывать ручные правки конкретных комнат
+// (src/data/room-overrides.json, редактируется вручную как JSON), см. setOverrides().
 import {
   LEVEL_COLS, LEVEL_ROWS, ROOMS_PER_LEVEL, ROOM_COLS, ROOM_ROWS,
   TILE_EMPTY, TILE_WALL, TILE_ELECTRIC, TILE_LOCKED_DOOR,
@@ -212,7 +212,7 @@ const LEVEL_CACHE = new Map();
 let OVERRIDES = {};
 
 // Применяется один раз при старте (см. main.js), после fetch файла с
-// ручными правками комнат, сделанными в редакторе (editor/).
+// ручными правками отдельных комнат (src/data/room-overrides.json).
 export function setOverrides(data) {
   OVERRIDES = data || {};
   LEVEL_CACHE.clear();

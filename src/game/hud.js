@@ -20,9 +20,7 @@ export function drawHud(ctx, world) {
   ctx.textAlign = 'left';
   const y = HUD_H / 2;
 
-  // Room coordinates: 1-indexed (column, row) within the level's 8x4 grid —
-  // deliberately 1-indexed for this player-facing HUD, unlike the 0-indexed
-  // (col, row) the room editor shows for the same room.
+  // Room coordinates: 1-indexed (column, row) within the level's 8x4 grid.
   const col = (world.roomId % LEVEL_COLS) + 1;
   const row = Math.floor(world.roomId / LEVEL_COLS) + 1;
   const keyState = world.keysCollected[world.levelIndex] ? 'KEY OK' : (world.level.lockedEdge ? 'KEY --' : '');

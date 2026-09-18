@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<!--
+  Standalone gallery generator for README images: renders each named sprite
+  straight from src/game/sprites.js (imported as a real ES module -- no
+  pattern/palette duplication, unlike icon-gen.html which has to duplicate
+  the player sprite since it needs to stand alone as a PWA icon source)
+  onto a padded canvas at a larger, easy-to-screenshot size. Open this file
+  through a local server (ES modules don't load over file://) and
+  screenshot each canvas -- or drive it headlessly, e.g. with Playwright --
+  to (re)export docs/sprites/*.png whenever a sprite's pattern or palette
+  changes in sprites.js.
+-->
+<head><meta charset="utf-8" /><title>sprite gallery generator</title>
+<style>body{background:#000;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;padding:16px;}canvas{image-rendering:pixelated;display:block;}</style>
+</head>
+<body>
+<canvas id="out-player" width="192" height="192"></canvas>
+<canvas id="out-enemy1" width="192" height="192"></canvas>
+<canvas id="out-enemy2" width="192" height="192"></canvas>
+<canvas id="out-shadow" width="192" height="192"></canvas>
+<canvas id="out-key" width="192" height="192"></canvas>
+<canvas id="out-exit" width="192" height="192"></canvas>
+<script type="module">
+import { sprite } from '../src/game/sprites.js';
+
+const BG = '#111318';
+const SIZE = 192;
+const PADDING_RATIO = 0.12;
+
+function drawOnto(canvasId, spriteName) {
+  const cnv = document.getElementById(canvasId);
+  const ctx = cnv.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, SIZE, SIZE);
+  const src = sprite(spriteName);
+  const usable = SIZE * (1 - PADDING_RATIO * 2);
+  const offset = (SIZE - usable) / 2;
+  ctx.drawImage(src, offset, offset, usable, usable);
+}
+
+drawOnto('out-player', 'player');
+drawOnto('out-enemy1', 'enemy1');
+drawOnto('out-enemy2', 'enemy2');
+drawOnto('out-shadow', 'shadow');
+drawOnto('out-key', 'key');
+drawOnto('out-exit', 'exit');
+
+window.__spritesReady = true; // signal for the headless screenshot script
+</script>
+</body>
+</html>
